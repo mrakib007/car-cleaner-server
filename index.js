@@ -30,10 +30,25 @@ app.get('/services',(req,res)=>{
     });
 });
 
+app.delete('/delete/:_id',(req,res)=>{
+    serviceCollection.deleteOne({_id: ObjectID(req.params._id)})
+    .then((result)=>{
+        res.send(result.deletedCount > 0);
+    })
+    .catch((err)=> console.log(err));
+});
+
 app.post('/addAdmin',(req,res)=>{
     const admin = req.body;
     adminCollection.insertOne(admin).then((result) =>{
         res.send(result.insertedCount > 0);
+    });
+});
+
+app.post('/isAdmin',(req,res)=>{
+    const {email} = req.body;
+    adminCollection.find({email}).toArray((err,documents)=>{
+        res.send(documents.length>0);
     });
 });
 
