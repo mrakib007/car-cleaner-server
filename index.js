@@ -2,7 +2,8 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const MongoClient = require('mongodb').MongoClient;
-const { ObjectID } = require('mongodb').ObjectID;
+// const { ObjectID } = require('mongodb').ObjectID;
+const { ObjectId } = require('mongodb');
 require('dotenv').config();
 const app = express();
 app.use(express.json());
@@ -16,6 +17,7 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 client.connect(err => {
   const serviceCollection = client.db("carCleaner").collection("services");
   const adminCollection = client.db('carCleaner').collection('admin');
+  const ordersCollection = client.db('carCleaner').collection('service-orders');
 
   app.post('/addService',(req,res) =>{
     const newProduct = req.body;
@@ -30,12 +32,47 @@ app.get('/services',(req,res)=>{
     });
 });
 
+app.get('/service/:_id', (req, res) => {
+    serviceCollection.find({ _id: ObjectId(req.params._id) }).toArray((err, documents) => {
+        res.send(documents);
+    });
+});
+
+app.get('/servicesOrder',(req,res)=>{
+    ordersCollection.find().toArray((err,items)=>{
+        res.send(items);
+    });
+});
+
+app.post('/addServicesOrder', (req, res) => {
+    const order = req.body;
+    ordersCollection.insertOne(order).then((result) => {
+        res.send(result.insertedCount > 0);
+    });
+});
+
 app.delete('/delete/:_id',(req,res)=>{
     serviceCollection.deleteOne({_id: ObjectID(req.params._id)})
     .then((result)=>{
         res.send(result.deletedCount > 0);
     })
     .catch((err)=> console.log(err));
+});
+
+app.patch('/update/:_id',(req,res) =>{
+    ordersCollection.updateOne(
+        {
+            _id: ObjectId(req.params._id)
+        },
+        {
+            $set: {
+                status: req.body.status,
+            }
+        }
+    )
+    .then((result)=>{
+        res.send(result.modifiedCount > 0);
+    });
 });
 
 app.post('/addAdmin',(req,res)=>{
