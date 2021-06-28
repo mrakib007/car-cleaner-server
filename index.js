@@ -97,11 +97,12 @@ app.post('/addReview',(req,res)=>{
     });
 });
 
-app.get('/reviews',(req,res)=>{
-    reviewCollection.find.toArray((err,documents)=>{
+app.get('/reviews', (req, res) => {
+    reviewCollection.find().toArray((err, documents) => {
         res.send(documents);
     });
 });
+
 
 app.delete('/deleteReview/:_id',(req,res)=>{
     reviewCollection.deleteOne({_id: ObjectId(req.params._id)})
