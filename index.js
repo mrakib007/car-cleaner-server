@@ -18,6 +18,7 @@ client.connect(err => {
   const serviceCollection = client.db("carCleaner").collection("services");
   const adminCollection = client.db('carCleaner').collection('admin');
   const ordersCollection = client.db('carCleaner').collection('service-orders');
+  const reviewCollection = client.db('carCleaner').collection('reviews');
 
   app.post('/addService',(req,res) =>{
     const newProduct = req.body;
@@ -87,6 +88,27 @@ app.post('/isAdmin',(req,res)=>{
     adminCollection.find({email}).toArray((err,documents)=>{
         res.send(documents.length>0);
     });
+});
+
+app.post('/addReview',(req,res)=>{
+    const review = req.body;
+    reviewCollection.insertOne(review).then((result)=>{
+        res.send(result.insertedCount>0);
+    });
+});
+
+app.get('/reviews',(req,res)=>{
+    reviewCollection.find.toArray((err,documents)=>{
+        res.send(documents);
+    });
+});
+
+app.delete('/deleteReview/:_id',(req,res)=>{
+    reviewCollection.deleteOne({_id: ObjectId(req.params._id)})
+    .then((result)=>{
+        res.setDefaultEncoding(result.deletedCount>0);
+    })
+    .catch((err)=> console.log(err));
 });
 
 app.get('/',(req,res)=>{
